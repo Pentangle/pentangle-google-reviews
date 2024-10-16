@@ -259,8 +259,8 @@ function generate_stars($rating)
 
     $stars = '';
     for ($i = 1; $i <= 5; $i++) {
-        $class = ($i <= $rating) ? 'filled' : 'empty';
-        $stars .= '<img src="' . plugin_dir_url(__FILE__) . 'star.svg" class="review-star ' . $class . '">';
+        $file = ($i <= $rating) ? 'star-full' : 'star-empty';
+        $stars .= '<img src="' . plugin_dir_url(__FILE__) . $file.'.svg" class="review-star">';
     }
     return $stars;
 }
