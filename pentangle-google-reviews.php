@@ -251,7 +251,7 @@ function pentangle_google_review_css()
     $plugin_url = plugin_dir_url(__FILE__);
     wp_enqueue_style('gr_styles', $plugin_url . "/css/plugin-style.css");
 }
-add_action('wp_enqueue_style', 'pentangle_google_review_css');
+
 
 
 // Register the shortcode [google_reviews number=""]
