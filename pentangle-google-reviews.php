@@ -56,6 +56,13 @@ function grf_settings_init()
         'grf-settings'
     );
 
+    add_settings_section(
+        'grf_options_section',
+        'Google Reviews shortcode settings',
+        'grf_options_section_callback',
+        'grf-settings'
+    );
+
     add_settings_field(
         'grf_api_key',
         'Google API Key',
@@ -76,11 +83,23 @@ add_action('admin_init', 'grf_settings_init');
 
 function grf_settings_section_callback()
 {
-    echo 'To get your Google Places API Key, visit the <a href="https://developers.google.com/places/web-service/get-api-key" target="_blank">Google Developers Console</a>.<br>';
-    echo 'To find your Place ID, search for your business on <a href="https://developers.google.com/places/place-id" target="_blank">Google Places ID Finder</a>.<br>';
-    echo 'If you would like to override the default output, create a file called <code>pentangle-google-reviews.php</code> in your theme folder.';
+    echo 'To get your Google Places API Key, visit the <a href="https://developers.google.com/places/web-service/get-api-key" target="_blank">Google Developers Console</a>.<br><br>';
+    echo 'As this plugin uses a background request to get the dat you must set your restrictions based on the IP address of your server rather than the domain.<br><br>';
+    echo 'To find your Place ID, search for your business on <a href="https://developers.google.com/places/place-id" target="_blank">Google Places ID Finder</a>.<br><br>';
     echo 'Enter your Google Places API Key and Place ID below:';
 }
+function grf_options_section_callback()
+{
+    echo 'To display the reviews, use the following code in the file:<br>';
+    echo '<pre>[google_reviews number="5" min_rating="3"]</pre><br>';
+
+    echo 'If you would like to override the default output, create a file called <code>pentangle-google-reviews.php</code> in your theme folder.<br><br>';
+    echo 'The data is cached for 5 minutes to reduce the number of requests to the Google Places API.';
+    echo 'The data is available to your template file in the variable <code>$grf_reviews</code>.';
+
+}
+
+
 
 function grf_api_key_render()
 {
@@ -113,7 +132,8 @@ function grf_display_google_reviews($atts)
     // Shortcode attributes to override settings if provided
     $atts = shortcode_atts(
         array(
-            'number' => 5 // Number of reviews to display
+            'number' => 5, // Number of reviews to display
+            'min_rating' => 0    // Minimum rating to display reviews
         ),
         $atts
     );
@@ -154,8 +174,13 @@ function grf_display_google_reviews($atts)
         }
     }
 
-    // Limit the number of reviews to display
-    $reviews = array_slice($data['result']['reviews'], 0, $atts['number']);
+    // Filter reviews by minimum rating
+    $filtered_reviews = array_filter($data['result']['reviews'], function($review) use ($atts) {
+        return $review['rating'] >= $atts['min_rating'];
+    });
+
+    // Limit the number of reviews to display after filtering
+    $grf_reviews = array_slice($filtered_reviews, 0, $atts['number']);
 
     // Start outputting the reviews in HTML
     ob_start();
@@ -167,7 +192,7 @@ function grf_display_google_reviews($atts)
     }else{
 
         echo '<div class="google-reviews">';
-        foreach ($reviews as $review) {
+        foreach ($grf_reviews as $review) {
             ?>
             <div class="google-review">
                 <p><strong><?= esc_html($review['author_name']); ?></strong></p>
