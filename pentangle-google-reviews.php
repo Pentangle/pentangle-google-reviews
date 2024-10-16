@@ -24,6 +24,7 @@ function grf_add_admin_menu()
         100                              // Position
     );
 }
+
 add_action('admin_menu', 'grf_add_admin_menu');
 
 // Create the settings page
@@ -94,6 +95,7 @@ function grf_settings_init()
         'grf_settings_section'
     );
 }
+
 add_action('admin_init', 'grf_settings_init');
 
 function grf_settings_section_callback()
@@ -103,6 +105,7 @@ function grf_settings_section_callback()
     echo 'To find your Place ID, search for your business on <a href="https://developers.google.com/places/place-id" target="_blank">Google Places ID Finder</a>.<br><br>';
     echo 'Enter your Google Places API Key and Place ID below:';
 }
+
 function grf_options_section_callback()
 {
     echo '<h2>Displaying Reviews</h2>';
@@ -119,7 +122,7 @@ function grf_api_key_render()
 {
     $api_key = get_option('grf_api_key');
     ?>
-    <input type="text" name="grf_api_key" value="<?php echo esc_attr($api_key); ?>" style="width: 400px;" />
+    <input type="text" name="grf_api_key" value="<?php echo esc_attr($api_key); ?>" style="width: 400px;"/>
     <?php
 }
 
@@ -127,7 +130,7 @@ function grf_place_id_render()
 {
     $place_id = get_option('grf_place_id');
     ?>
-    <input type="text" name="grf_place_id" value="<?php echo esc_attr($place_id); ?>" style="width: 400px;" />
+    <input type="text" name="grf_place_id" value="<?php echo esc_attr($place_id); ?>" style="width: 400px;"/>
     <?php
 }
 
@@ -199,23 +202,23 @@ function grf_display_google_reviews($atts)
     }
 
     // Filter reviews by minimum rating
-    $filtered_reviews = array_filter($data['result']['reviews'], function($review) use ($atts) {
+    $filtered_reviews = array_filter($data['result']['reviews'], function ($review) use ($atts) {
         return $review['rating'] >= $atts['min_rating'];
     });
 
     // Limit the number of reviews to display after filtering
     $grf_reviews = array_slice($filtered_reviews, 0, $atts['number']);
-    $grf_review_data = ['rating'=>$data['result']['rating'],'user_ratings_total'=>$data['result']['user_ratings_total']];
+    $grf_review_data = ['rating' => $data['result']['rating'], 'user_ratings_total' => $data['result']['user_ratings_total']];
 
     // Start outputting the reviews in HTML
     ob_start();
 
     //check if there is a file called pentangle-google-reviews.php in the theme folder
 
-    if(file_exists(get_template_directory().'/pentangle-google-reviews.php')){
-        include get_template_directory().'/pentangle-google-reviews.php';
-    }else{
-
+    if (file_exists(get_template_directory() . '/pentangle-google-reviews.php')) {
+        include get_template_directory() . '/pentangle-google-reviews.php';
+    } else {
+       pentangle_google_review_css();
         echo '<div class="google-reviews">';
         foreach ($grf_reviews as $review) {
             ?>
@@ -225,22 +228,31 @@ function grf_display_google_reviews($atts)
                 <p><?= esc_html($review['text']); ?></p>
                 <p><em><?= esc_html($review['relative_time_description']) ?></em></p>
             </div>
-            <hr />
+            <hr/>
             <?php
         }
 
         //create a link to the google_g_icon_download.png in the plugin folder
-        echo '<img src="'.plugin_dir_url(__FILE__).'google_g_icon_download.png" alt="Google Reviews" style="width: 100px; height: 100px;">';
-        echo '<p>Average Rating: '. $grf_review_data['rating'].' out of 5 based on '.$grf_review_data['user_ratings_total'].' reviews</p>';
-        echo '<p><a href="https://www.google.com/search?q='.urlencode($data['result']['name']).'&ludocid='.$place_id.'&hl=en" target="_blank">Read more reviews on Google</a></p>';
+        echo '<div class="overall-rating">';
+        echo '<img src="' . plugin_dir_url(__FILE__) . 'google_g_icon_download.png" alt="Google Reviews" style="width: 100px; height: 100px;">';
+        echo '<p>Average Rating: ' . $grf_review_data['rating'] . ' out of 5 based on ' . $grf_review_data['user_ratings_total'] . ' reviews</p>';
+        echo '<p><a href="https://www.google.com/search?q=' . urlencode($data['result']['name']) . '&ludocid=' . $place_id . '&hl=en" target="_blank">Read more reviews on Google</a></p>';
+        echo '</div>';
         echo '</div>';
 
     }
 
 
-
     return ob_get_clean();
 }
+
+function pentangle_google_review_css()
+{
+    $plugin_url = plugin_dir_url(__FILE__);
+    wp_enqueue_style('gr_styles', $plugin_url . "/css/plugin-style.css");
+}
+add_action('wp_enqueue_style', 'pentangle_google_review_css');
+
 
 // Register the shortcode [google_reviews number=""]
 add_shortcode('google_reviews', 'grf_display_google_reviews');

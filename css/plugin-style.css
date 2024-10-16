@@ -1,0 +1,13 @@
+.google-reviews{
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.google-review{
+    flex: 1 1 0%;
+}
+
+.overall-rating{
+    width: 100%;
+}
