@@ -112,6 +112,7 @@ function grf_options_section_callback()
     echo 'The data is cached for 5 minutes to reduce the number of requests to the Google Places API.<br><br>';
     echo 'The data is available to your template file in the variable <code>$grf_reviews</code>.<br><br>';
     echo 'The average rating and total number of reviews are available in the variable <code>$grf_review_data</code>.<br><br>';
+    echo 'The Google logo is available in the plugin folder as <code>google_g_icon_download.png</code> using plugin_dir_url(__FILE__).\'google_g_icon_download.png\'<br><br>';
 }
 
 function grf_api_key_render()
@@ -228,8 +229,10 @@ function grf_display_google_reviews($atts)
             <?php
         }
 
-        echo 'Average Rating: '. $grf_review_data['rating'].' out of 5 based on '.$grf_review_data['user_ratings_total'].' reviews';
-
+        //create a link to the google_g_icon_download.png in the plugin folder
+        echo '<img src="'.plugin_dir_url(__FILE__).'google_g_icon_download.png" alt="Google Reviews" style="width: 100px; height: 100px;">';
+        echo '<p>Average Rating: '. $grf_review_data['rating'].' out of 5 based on '.$grf_review_data['user_ratings_total'].' reviews</p>';
+        echo '<p><a href="https://www.google.com/search?q='.urlencode($data['result']['name']).'&ludocid='.$place_id.'&hl=en" target="_blank">Read more reviews on Google</a></p>';
         echo '</div>';
 
     }
