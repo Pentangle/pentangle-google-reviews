@@ -201,13 +201,12 @@ function grf_display_google_reviews($atts)
         }
     }
 
-    // Filter reviews by minimum rating
-    $filtered_reviews = array_filter($data['result']['reviews'], function ($review) use ($atts) {
-        return $review['rating'] >= $atts['min_rating'];
-    });
+    foreach($data['result']['reviews'] as $key=>$review){
+        $data['result']['reviews'][$key]['stars'] = generate_stars($review['rating']);
+    }
 
     // Limit the number of reviews to display after filtering
-    $grf_reviews = array_slice($filtered_reviews, 0, $atts['number']);
+    $grf_reviews = array_slice($data['result']['reviews'] , 0, $atts['number']);
     $grf_review_data = ['rating' => $data['result']['rating'], 'user_ratings_total' => $data['result']['user_ratings_total']];
 
     // Start outputting the reviews in HTML
@@ -225,7 +224,7 @@ function grf_display_google_reviews($atts)
             <div class="google-review">
                 <img src="<?= esc_url($review['profile_photo_url']); ?>" alt="<?= $review['author_name'];?> Reviewer Image" style="width: 50px; height: 50px; border-radius: 50%;">
                 <p><strong><?= esc_html($review['author_name']); ?></strong></p>
-                <p>Rating: <?= generate_stars($review['rating']); ?></p>
+                <p>Rating: <?= $review['stars']; ?></p>
                 <p><?= esc_html($review['text']); ?></p>
                 <p><em><?= esc_html($review['relative_time_description']) ?></em></p>
             </div>
