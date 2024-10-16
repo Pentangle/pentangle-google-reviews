@@ -223,8 +223,9 @@ function grf_display_google_reviews($atts)
         foreach ($grf_reviews as $review) {
             ?>
             <div class="google-review">
+                <img src="<?= esc_url($review['profile_photo_url']); ?>" alt="<?= $review['author_name'];?> Reviewer Image" style="width: 50px; height: 50px; border-radius: 50%;">
                 <p><strong><?= esc_html($review['author_name']); ?></strong></p>
-                <p>Rating: <?= esc_html($review['rating']); ?>/5</p>
+                <p>Rating: <?= generate_stars($review['rating']); ?></p>
                 <p><?= esc_html($review['text']); ?></p>
                 <p><em><?= esc_html($review['relative_time_description']) ?></em></p>
             </div>
@@ -252,7 +253,18 @@ function pentangle_google_review_css()
     wp_enqueue_style('gr_styles', $plugin_url . "/css/plugin-style.css");
 }
 
+function generate_stars($rating)
+{
 
+    //load the star.svg file and repeat it 5 times changing the colour from yellow to gray
+
+    $stars = '';
+    for ($i = 1; $i <= 5; $i++) {
+        $class = ($i <= $rating) ? 'filled' : 'empty';
+        $stars .= '<img src="' . plugin_dir_url(__FILE__) . 'star.svg" class="review-star ' . $class . '">';
+    }
+    return $stars;
+}
 
 // Register the shortcode [google_reviews number=""]
 add_shortcode('google_reviews', 'grf_display_google_reviews');

@@ -11,3 +11,16 @@
 .overall-rating{
     width: 100%;
 }
+
+.google-review img.review-star {
+    width: 20px;
+    color: #ccc;
+    fill: #ccc;
+    outline: #ccc;
+}
+.google-review  img.review-star.filled {
+    color: #f1c40f;
+    fill: #f1c40f;
+    outline: #f1c40f;
+}
+
