@@ -29,6 +29,18 @@ add_action('admin_menu', 'grf_add_admin_menu');
 // Create the settings page
 function grf_settings_page()
 {
+
+    // Check if settings have been saved
+    if (isset($_GET['settings-updated']) && $_GET['settings-updated'] === 'true') {
+        echo '<div class="updated notice is-dismissible"><p>Settings saved successfully!</p></div>';
+    }
+
+    // Handle cache clear request
+    if (isset($_POST['grf_clear_cache'])) {
+        grf_clear_cache();
+        echo '<div class="updated"><p>Google Reviews cache cleared successfully!</p></div>';
+    }
+
     ?>
     <div class="wrap">
         <h1>Google Reviews Settings</h1>
@@ -38,6 +50,15 @@ function grf_settings_page()
             do_settings_sections('grf-settings');
             submit_button();
             ?>
+        </form>
+
+        <?php grf_options_section_callback(); ?>
+
+        <!-- Add cache clearing button -->
+        <h2>Clear Cache</h2>
+        <form method="post">
+            <input type="hidden" name="grf_clear_cache" value="1">
+            <input type="submit" class="button-primary" value="Clear Google Reviews Cache">
         </form>
     </div>
     <?php
@@ -56,12 +77,6 @@ function grf_settings_init()
         'grf-settings'
     );
 
-    add_settings_section(
-        'grf_options_section',
-        'Google Reviews shortcode settings',
-        'grf_options_section_callback',
-        'grf-settings'
-    );
 
     add_settings_field(
         'grf_api_key',
@@ -90,16 +105,14 @@ function grf_settings_section_callback()
 }
 function grf_options_section_callback()
 {
+    echo '<h2>Displaying Reviews</h2>';
     echo 'To display the reviews, use the following code in the file:<br>';
     echo '<pre>[google_reviews number="5" min_rating="3"]</pre><br>';
-
     echo 'If you would like to override the default output, create a file called <code>pentangle-google-reviews.php</code> in your theme folder.<br><br>';
-    echo 'The data is cached for 5 minutes to reduce the number of requests to the Google Places API.';
-    echo 'The data is available to your template file in the variable <code>$grf_reviews</code>.';
-
+    echo 'The data is cached for 5 minutes to reduce the number of requests to the Google Places API.<br><br>';
+    echo 'The data is available to your template file in the variable <code>$grf_reviews</code>.<br><br>';
+    echo 'The average rating and total number of reviews are available in the variable <code>$grf_review_data</code>.<br><br>';
 }
-
-
 
 function grf_api_key_render()
 {
@@ -116,6 +129,17 @@ function grf_place_id_render()
     <input type="text" name="grf_place_id" value="<?php echo esc_attr($place_id); ?>" style="width: 400px;" />
     <?php
 }
+
+// Clear transient cache function
+function grf_clear_cache()
+{
+    $place_id = get_option('grf_place_id');
+    if ($place_id) {
+        $cache_key = 'grf_google_reviews_data_' . md5($place_id);
+        delete_transient($cache_key);
+    }
+}
+
 
 // Shortcode to display Google Reviews
 function grf_display_google_reviews($atts)
@@ -149,7 +173,7 @@ function grf_display_google_reviews($atts)
         $data = json_decode($cached_data, true);
     } else {
         // Call the Google Places API to fetch reviews
-        $response = wp_remote_get("https://maps.googleapis.com/maps/api/place/details/json?placeid={$place_id}&key={$api_key}&fields=reviews");
+        $response = wp_remote_get("https://maps.googleapis.com/maps/api/place/details/json?placeid={$place_id}&key={$api_key}&reviews_sort=newest");
 
         // Check for errors in the API response
         if (is_wp_error($response)) {
@@ -161,7 +185,6 @@ function grf_display_google_reviews($atts)
             // Decode the JSON response
             $body = wp_remote_retrieve_body($response);
             $data = json_decode($body, true);
-
             // Check if there are reviews in the response
             if (empty($data['result']['reviews'])) {
                 return '<p>No reviews found for this location.</p>';
@@ -181,6 +204,7 @@ function grf_display_google_reviews($atts)
 
     // Limit the number of reviews to display after filtering
     $grf_reviews = array_slice($filtered_reviews, 0, $atts['number']);
+    $grf_review_data = ['rating'=>$data['result']['rating'],'user_ratings_total'=>$data['result']['user_ratings_total']];
 
     // Start outputting the reviews in HTML
     ob_start();
@@ -203,8 +227,10 @@ function grf_display_google_reviews($atts)
             <hr />
             <?php
         }
-        echo '</div>';
 
+        echo 'Average Rating: '. $grf_review_data['rating'].' out of 5 based on '.$grf_review_data['user_ratings_total'].' reviews';
+
+        echo '</div>';
 
     }
 
