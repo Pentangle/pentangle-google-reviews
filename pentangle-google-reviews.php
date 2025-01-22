@@ -152,6 +152,20 @@ function grf_display_google_reviews($atts)
     $api_key = get_option('grf_api_key');
     $place_id = get_option('grf_place_id');
 
+    if(isset($atts['place_id']))
+    {
+        $place_id = $atts['place_id'];
+    }
+    //check if there is a file called pentangle-google-reviews.php in the theme folder
+
+    $template = 'pentangle-google-reviews';
+
+    if(isset($atts['template']))
+    {
+        $template = $atts['template'];
+    }
+
+
     // If API Key or Place ID is missing, return an error message
     if (empty($api_key) || empty($place_id)) {
         return '<p>Error: API key or Place ID is not set in the settings page.</p>';
@@ -212,10 +226,8 @@ function grf_display_google_reviews($atts)
     // Start outputting the reviews in HTML
     ob_start();
 
-    //check if there is a file called pentangle-google-reviews.php in the theme folder
-
-    if (file_exists(get_template_directory() . '/pentangle-google-reviews.php')) {
-        include get_template_directory() . '/pentangle-google-reviews.php';
+    if (file_exists(get_template_directory() . '/'.$template.'.php')) {
+        include get_template_directory() . '/'.$template.'.php';
     } else {
        pentangle_google_review_css();
         echo '<div class="google-reviews">';
