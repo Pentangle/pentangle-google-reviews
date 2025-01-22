@@ -101,7 +101,7 @@ add_action('admin_init', 'grf_settings_init');
 function grf_settings_section_callback()
 {
     echo 'To get your Google Places API Key, visit the <a href="https://developers.google.com/places/web-service/get-api-key" target="_blank">Google Developers Console</a>.<br><br>';
-    echo 'As this plugin uses a background request to get the dat you must set your restrictions based on the IP address of your server rather than the domain.<br><br>';
+    echo 'As this plugin uses a background request to get the data you must set your restrictions based on the IP address of your server rather than the domain.<br><br>';
     echo 'To find your Place ID, search for your business on <a href="https://developers.google.com/places/place-id" target="_blank">Google Places ID Finder</a>.<br><br>';
     echo 'Enter your Google Places API Key and Place ID below:';
 }
