@@ -137,12 +137,15 @@ function grf_place_id_render()
 // Clear transient cache function
 function grf_clear_cache()
 {
-    $place_id = get_option('grf_place_id');
-    if ($place_id) {
-        $cache_key = 'grf_google_reviews_data_' . md5($place_id);
-        delete_transient($cache_key);
-    }
+    global $wpdb;
+    $sql = "DELETE
+            FROM  $wpdb->options
+            WHERE `option_name` LIKE '%grf_google_reviews_data_%'
+            ORDER BY `option_name`";
+
+    $results = $wpdb->query($sql);
 }
+
 
 
 // Shortcode to display Google Reviews
@@ -191,7 +194,8 @@ function grf_display_google_reviews($atts)
         $data = json_decode($cached_data, true);
     } else {
         // Call the Google Places API to fetch reviews
-        $response = wp_remote_get("https://maps.googleapis.com/maps/api/place/details/json?placeid={$place_id}&key={$api_key}&reviews_sort=newest");
+        $url = "https://maps.googleapis.com/maps/api/place/details/json?placeid={$place_id}&key={$api_key}&reviews_sort=newest";
+        $response = wp_remote_get($url);
 
         // Check for errors in the API response
         if (is_wp_error($response)) {
@@ -205,6 +209,10 @@ function grf_display_google_reviews($atts)
             $data = json_decode($body, true);
             // Check if there are reviews in the response
             if (empty($data['result']['reviews'])) {
+
+                //write the response to the wp error log
+                error_log($url);
+                error_log(print_r( $data, 1));
                 return '<p>No reviews found for this location.</p>';
             }
 
