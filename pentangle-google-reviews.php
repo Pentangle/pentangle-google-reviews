@@ -224,7 +224,7 @@ function grf_display_google_reviews($atts)
     }
 
     foreach($data['result']['reviews'] as $key=>$review){
-        $data['result']['reviews'][$key]['stars'] = generate_stars($review['rating']);
+        $data['result']['reviews'][$key]['stars'] = grf_generate_stars($review['rating']);
     }
 
     // Limit the number of reviews to display after filtering
@@ -272,7 +272,7 @@ function pentangle_google_review_css()
     wp_enqueue_style('gr_styles', $plugin_url . "/css/plugin-style.css");
 }
 
-function generate_stars($rating)
+function grf_generate_stars($rating)
 {
 
     //load the star.svg file and repeat it 5 times changing the colour from yellow to gray
