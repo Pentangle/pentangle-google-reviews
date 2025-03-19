@@ -278,11 +278,33 @@ function grf_generate_stars($rating)
     //load the star.svg file and repeat it 5 times changing the colour from yellow to gray
 
     $stars = '';
-    for ($i = 1; $i <= 5; $i++) {
-        $file = ($i <= $rating) ? 'star-full' : 'star-empty';
+    for ($i = 0; $i <= 4; $i++) {
+
+        //check if the rating is less than the current star and change the file to star-empty or star-half for any over 0.5
+
+        if($rating - $i >= 1){
+            $file = 'star-full';
+        }elseif($rating - $i > 0.5){
+            $file = 'star-half';
+        }
+        else{
+            $file = 'star-empty';
+        }
+
+        //$file = ($i <= $rating) ? 'star-full' : 'star-empty';
         $stars .= '<img src="' . plugin_dir_url(__FILE__) . $file.'.svg" class="review-star">';
     }
     return $stars;
+}
+
+add_action( 'init', 'pentangle_activate_wp' );
+function pentangle_activate_wp()
+{
+    require_once ('wp_autoupdate.php');      // File which contains the Class below
+    $pentangle_plugin_current_version = '1.3';
+    $pentangle_plugin_remote_path     = 'https://scripts.pentangle.co.uk/pentangle-google-reviews/update.php';
+    $pentangle_plugin_slug            = plugin_basename(__FILE__);
+    new wp_auto_update( $pentangle_plugin_current_version, $pentangle_plugin_remote_path, $pentangle_plugin_slug );
 }
 
 // Register the shortcode [google_reviews number=""]
