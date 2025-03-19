@@ -122,7 +122,7 @@ function grf_api_key_render()
 {
     $api_key = get_option('grf_api_key');
     ?>
-    <input type="text" name="grf_api_key" value="<?php echo esc_attr($api_key); ?>" style="width: 400px;"/>
+    <input type="text" name="grf_api_key" value="<?php echo esc_attr($api_key); ?>" style="width: 400px;" />
     <?php
 }
 
@@ -130,7 +130,7 @@ function grf_place_id_render()
 {
     $place_id = get_option('grf_place_id');
     ?>
-    <input type="text" name="grf_place_id" value="<?php echo esc_attr($place_id); ?>" style="width: 400px;"/>
+    <input type="text" name="grf_place_id" value="<?php echo esc_attr($place_id); ?>" style="width: 400px;" />
     <?php
 }
 
@@ -147,7 +147,6 @@ function grf_clear_cache()
 }
 
 
-
 // Shortcode to display Google Reviews
 function grf_display_google_reviews($atts)
 {
@@ -155,16 +154,14 @@ function grf_display_google_reviews($atts)
     $api_key = get_option('grf_api_key');
     $place_id = get_option('grf_place_id');
 
-    if(isset($atts['place_id']))
-    {
+    if (isset($atts['place_id'])) {
         $place_id = $atts['place_id'];
     }
     //check if there is a file called pentangle-google-reviews.php in the theme folder
 
     $template = 'pentangle-google-reviews';
 
-    if(isset($atts['template']))
-    {
+    if (isset($atts['template'])) {
         $template = $atts['template'];
     }
 
@@ -212,7 +209,7 @@ function grf_display_google_reviews($atts)
 
                 //write the response to the wp error log
                 error_log($url);
-                error_log(print_r( $data, 1));
+                error_log(print_r($data, 1));
                 return '<p>No reviews found for this location.</p>';
             }
 
@@ -223,32 +220,34 @@ function grf_display_google_reviews($atts)
         }
     }
 
-    foreach($data['result']['reviews'] as $key=>$review){
+    foreach ($data['result']['reviews'] as $key => $review) {
         $data['result']['reviews'][$key]['stars'] = grf_generate_stars($review['rating']);
     }
 
     // Limit the number of reviews to display after filtering
-    $grf_reviews = array_slice($data['result']['reviews'] , 0, $atts['number']);
+    $grf_reviews = array_slice($data['result']['reviews'], 0, $atts['number']);
     $grf_review_data = ['rating' => $data['result']['rating'], 'user_ratings_total' => $data['result']['user_ratings_total']];
 
     // Start outputting the reviews in HTML
     ob_start();
 
-    if (file_exists(get_template_directory() . '/'.$template.'.php')) {
-        include get_template_directory() . '/'.$template.'.php';
+    if (file_exists(get_template_directory() . '/' . $template . '.php')) {
+        include get_template_directory() . '/' . $template . '.php';
     } else {
         pentangle_google_review_css();
         echo '<div class="google-reviews">';
         foreach ($grf_reviews as $review) {
             ?>
             <div class="google-review">
-                <img src="<?= esc_url($review['profile_photo_url']); ?>" alt="<?= $review['author_name'];?> Reviewer Image" style="width: 50px; height: 50px; border-radius: 50%;">
+                <img src="<?= esc_url($review['profile_photo_url']); ?>"
+                     alt="<?= $review['author_name']; ?> Reviewer Image"
+                     style="width: 50px; height: 50px; border-radius: 50%;">
                 <p><strong><?= esc_html($review['author_name']); ?></strong></p>
                 <p>Rating: <?= $review['stars']; ?></p>
                 <p><?= esc_html($review['text']); ?></p>
                 <p><em><?= esc_html($review['relative_time_description']) ?></em></p>
             </div>
-            <hr/>
+            <hr />
             <?php
         }
 
@@ -282,29 +281,28 @@ function grf_generate_stars($rating)
 
         //check if the rating is less than the current star and change the file to star-empty or star-half for any over 0.5
 
-        if($rating - $i >= 1){
+        if ($rating - $i >= 1) {
             $file = 'star-full';
-        }elseif($rating - $i > 0.5){
+        } elseif ($rating - $i > 0.5) {
             $file = 'star-half';
-        }
-        else{
+        } else {
             $file = 'star-empty';
         }
 
         //$file = ($i <= $rating) ? 'star-full' : 'star-empty';
-        $stars .= '<img src="' . plugin_dir_url(__FILE__) . $file.'.svg" class="review-star">';
+        $stars .= '<img src="' . plugin_dir_url(__FILE__) . $file . '.svg" class="review-star">';
     }
     return $stars;
 }
 
-add_action( 'init', 'pentangle_activate_wp' );
+add_action('init', 'pentangle_activate_wp');
 function pentangle_activate_wp()
 {
-    require_once ('wp_autoupdate.php');      // File which contains the Class below
+    require_once('wp_autoupdate.php');      // File which contains the Class below
     $pentangle_plugin_current_version = '1.3';
-    $pentangle_plugin_remote_path     = 'https://scripts.pentangle.co.uk/pentangle-google-reviews/update.php';
-    $pentangle_plugin_slug            = plugin_basename(__FILE__);
-    new wp_auto_update( $pentangle_plugin_current_version, $pentangle_plugin_remote_path, $pentangle_plugin_slug );
+    $pentangle_plugin_remote_path = 'https://scripts.pentangle.co.uk/pentangle-google-reviews/update.php';
+    $pentangle_plugin_slug = plugin_basename(__FILE__);
+    new wp_auto_update($pentangle_plugin_current_version, $pentangle_plugin_remote_path, $pentangle_plugin_slug);
 }
 
 // Register the shortcode [google_reviews number=""]
