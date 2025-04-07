@@ -68,7 +68,7 @@ function self_update($transient)
         'slug' => $plugin_data['TextDomain'],
         'plugin' => $plugin_file,
         'new_version' => $new_version_number,
-        'package' => $output['zipball_url'],
+        'package' => $output['assets'][0]['browser_download_url'],
         'author' => $plugin_data['Author'],
     ];
 
@@ -136,7 +136,7 @@ function self_plugin_details($def, $action, $args)
         'description' => $plugin_data['Description'],
         'changelog' => isset($release['body']) ? $parsedown->text($release['body']) : 'No changelog available.',
     ];
-    $plugin_info->download_link = $release['zipball_url'];
+    $plugin_info->download_link = $release['assets'][0]['browser_download_url'];
 
     return $plugin_info;
 }
