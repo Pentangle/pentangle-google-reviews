@@ -1,9 +1,11 @@
 <?php
+
 /**
  * Plugin Name: Google Reviews Fetcher
  * Description: A plugin to fetch and display Google reviews using Google Places API, with settings in the WordPress dashboard and caching for better performance.
  * Version: 1.3
  * Author: Pentangle Technology Limited
+ * Update URI: https://github.com/Pentangle/pentangle-google-reviews/
  */
 
 // Prevent direct access
@@ -42,7 +44,7 @@ function grf_settings_page()
         echo '<div class="updated"><p>Google Reviews cache cleared successfully!</p></div>';
     }
 
-    ?>
+?>
     <div class="wrap">
         <h1>Google Reviews Settings</h1>
         <form method="post" action="options.php">
@@ -62,7 +64,7 @@ function grf_settings_page()
             <input type="submit" class="button-primary" value="Clear Google Reviews Cache">
         </form>
     </div>
-    <?php
+<?php
 }
 
 // Register settings, sections, and fields
@@ -121,15 +123,15 @@ function grf_options_section_callback()
 function grf_api_key_render()
 {
     $api_key = get_option('grf_api_key');
-    ?>
+?>
     <input type="text" name="grf_api_key" value="<?php echo esc_attr($api_key); ?>" style="width: 400px;" />
-    <?php
+<?php
 }
 
 function grf_place_id_render()
 {
     $place_id = get_option('grf_place_id');
-    ?>
+?>
     <input type="text" name="grf_place_id" value="<?php echo esc_attr($place_id); ?>" style="width: 400px;" />
     <?php
 }
@@ -237,18 +239,18 @@ function grf_display_google_reviews($atts)
         pentangle_google_review_css();
         echo '<div class="google-reviews">';
         foreach ($grf_reviews as $review) {
-            ?>
+    ?>
             <div class="google-review">
                 <img src="<?= esc_url($review['profile_photo_url']); ?>"
-                     alt="<?= $review['author_name']; ?> Reviewer Image"
-                     style="width: 50px; height: 50px; border-radius: 50%;">
+                    alt="<?= $review['author_name']; ?> Reviewer Image"
+                    style="width: 50px; height: 50px; border-radius: 50%;">
                 <p><strong><?= esc_html($review['author_name']); ?></strong></p>
                 <p>Rating: <?= $review['stars']; ?></p>
                 <p><?= esc_html($review['text']); ?></p>
                 <p><em><?= esc_html($review['relative_time_description']) ?></em></p>
             </div>
             <hr />
-            <?php
+<?php
         }
 
         //create a link to the google_g_icon_download.png in the plugin folder
@@ -258,7 +260,6 @@ function grf_display_google_reviews($atts)
         echo '<p><a href="https://www.google.com/search?q=' . urlencode($data['result']['name']) . '&ludocid=' . $place_id . '&hl=en" target="_blank">Read more reviews on Google</a></p>';
         echo '</div>';
         echo '</div>';
-
     }
 
 
@@ -299,10 +300,6 @@ add_action('init', 'pentangle_activate_wp');
 function pentangle_activate_wp()
 {
     require_once('wp_autoupdate.php');      // File which contains the Class below
-    $pentangle_plugin_current_version = '1.3';
-    $pentangle_plugin_remote_path = 'https://scripts.pentangle.co.uk/pentangle-google-reviews/update.php';
-    $pentangle_plugin_slug = plugin_basename(__FILE__);
-    new wp_auto_update($pentangle_plugin_current_version, $pentangle_plugin_remote_path, $pentangle_plugin_slug);
 }
 
 // Register the shortcode [google_reviews number=""]
