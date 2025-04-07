@@ -1,5 +1,7 @@
 <?php
 
+include "Parsedown.php";
+
 /**
  * Auto updater file for the Pentangle Google Reviews plugin.
  *
@@ -50,7 +52,7 @@ function self_update($transient)
     }
 
     $output = json_decode(wp_remote_retrieve_body($response), true);
-    if ($output['status'] === '404') {
+    if (isset($output['status']) && $output['status'] === '404') {
         return $transient; // No release found
     }
 
@@ -61,13 +63,12 @@ function self_update($transient)
         return $transient; // No update available
     }
 
-    $new_package = $output['assets'][0]['browser_download_url'];
     $update_array = [
         'id' => $plugin_file,
         'slug' => $plugin_data['TextDomain'],
         'plugin' => $plugin_file,
         'new_version' => $new_version_number,
-        'package' => $new_package,
+        'package' => $output['zipball_url'],
         'author' => $plugin_data['Author'],
     ];
 
@@ -120,6 +121,7 @@ function self_plugin_details($def, $action, $args)
         return $def;
     }
 
+    $parsedown = new Parsedown();
     $release = json_decode(wp_remote_retrieve_body($response), true);
 
     $plugin_info = new stdClass();
@@ -132,10 +134,19 @@ function self_plugin_details($def, $action, $args)
     $plugin_info->last_updated = $release['created_at'];
     $plugin_info->sections = [
         'description' => $plugin_data['Description'],
-        'changelog' => isset($release['body']) ? $release['body'] : 'No changelog available.',
+        'changelog' => isset($release['body']) ? $parsedown->text($release['body']) : 'No changelog available.',
     ];
     $plugin_info->download_link = $release['zipball_url'];
 
     return $plugin_info;
 }
 
+function plugin_modal_changelog_styles()
+{
+    if (is_admin()) : ?>
+        <style>
+            #section-changelog { display: inline-block !important; }
+        </style>
+<?php endif;
+}
+add_action('admin_head', 'plugin_modal_changelog_styles');
