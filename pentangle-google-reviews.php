@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Google Reviews Fetcher
  * Description: A plugin to fetch and display Google reviews using Google Places API, with settings in the WordPress dashboard and caching for better performance.
- * Version: 1.4.1
+ * Version: 1.4.4
  * Author: Pentangle Technology Limited
  * Update URI: https://github.com/Pentangle/pentangle-google-reviews/
  */
