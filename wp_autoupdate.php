@@ -22,6 +22,7 @@ add_action( 'admin_head', 'pentangle_google_reviews_changelog_styles' );
  * @return array|false Latest release data as an associative array, or false on error.
  */
 function pentangle_google_reviews_get_latest_release(): bool|array {
+	$github_access_token = grf_decrypt_data(get_option('grf_github_token'));
 	$transient_key  = 'pgr_latest_release';
 	$cached_release = get_transient( $transient_key );
 
@@ -31,7 +32,7 @@ function pentangle_google_reviews_get_latest_release(): bool|array {
 
 	$api_url = 'https://api.github.com/repos/Pentangle/pentangle-google-reviews/releases/latest';
 	$headers = [
-		'Authorization' => 'token ' . GITHUB_ACCESS_TOKEN,
+		'Authorization' => 'token ' . $github_access_token,
 		'User-Agent'    => 'WordPress',
 		'Accept'        => 'application/vnd.github.v3+json',
 	];

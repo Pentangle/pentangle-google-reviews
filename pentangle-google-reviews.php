@@ -44,6 +44,13 @@ function grf_settings_page()
         echo '<div class="updated"><p>Google Reviews cache cleared successfully!</p></div>';
     }
 
+    if ( ! get_option('grf_github_token') || empty(get_option('grf_github_token')) ) {
+        wp_admin_notice(
+            '<strong>Google Reviews</strong>: Please set the GitHub Access Token in the plugin settings to enable auto-updates',
+            ['type' => 'warning']
+        );
+    }
+
 ?>
     <div class="wrap">
         <h1>Google Reviews Settings</h1>
@@ -72,6 +79,9 @@ function grf_settings_init()
 {
     register_setting('grf_settings_group', 'grf_api_key');
     register_setting('grf_settings_group', 'grf_place_id');
+    register_setting('grf_settings_group', 'grf_github_token', function($value) {
+        return grf_encrypt_data($value);
+    });
 
     add_settings_section(
         'grf_settings_section',
@@ -96,6 +106,14 @@ function grf_settings_init()
         'grf-settings',
         'grf_settings_section'
     );
+
+    add_settings_field(
+        'grf_github_token',
+        'GitHub Token <small>(For Auto-Updates)</small>',
+        'grf_github_token_render',
+        'grf-settings',
+        'grf_settings_section'
+    );
 }
 
 add_action('admin_init', 'grf_settings_init');
@@ -117,7 +135,7 @@ function grf_options_section_callback()
     echo 'The data is cached for 5 minutes to reduce the number of requests to the Google Places API.<br><br>';
     echo 'The data is available to your template file in the variable <code>$grf_reviews</code>.<br><br>';
     echo 'The average rating and total number of reviews are available in the variable <code>$grf_review_data</code>.<br><br>';
-    echo 'The Google logo is available in the plugin folder as <code>google_g_icon_download.png</code> using plugin_dir_url(__FILE__).\'google_g_icon_download.png\'<br><br>';
+    echo 'The Google logo is available in the plugin folder as <code>google_g_icon_download.png</code> using <code>plugin_dir_url(__FILE__).\'google_g_icon_download.png\'</code><br><br>';
 }
 
 function grf_api_key_render()
@@ -133,6 +151,29 @@ function grf_place_id_render()
     $place_id = get_option('grf_place_id');
 ?>
     <input type="text" name="grf_place_id" value="<?php echo esc_attr($place_id); ?>" style="width: 400px;" />
+    <?php
+}
+
+function grf_encrypt_data($data) {
+    if (empty($data)) return '';
+    $key = substr(AUTH_KEY, 0, 32);
+    $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('aes-256-cbc'));
+    $encrypted = openssl_encrypt($data, 'AES-256-CBC', $key, 0, $iv);
+    return base64_encode($encrypted . '::' . $iv);
+}
+
+function grf_decrypt_data($data) {
+    if (empty($data)) return '';
+    $key = substr(AUTH_KEY, 0, 32);
+    list($encrypted_data, $iv) = explode('::', base64_decode($data), 2);
+    return openssl_decrypt($encrypted_data, 'AES-256-CBC', $key, 0, $iv);
+}
+
+function grf_github_token_render()
+{
+    $github_token = get_option('grf_github_token');
+?>
+    <input type="password" name="grf_github_token" value="<?php echo esc_attr($github_token); ?>" style="width: 400px;" />
     <?php
 }
 
